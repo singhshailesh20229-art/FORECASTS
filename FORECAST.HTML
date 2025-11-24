@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌦️ सिंगल फाइल मौसम विजेट</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #e9f0ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .weather-container {
+            background: linear-gradient(135deg, #74a0fd, #4a7af2);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+            text-align: center;
+            color: white;
+            width: 90%;
+            max-width: 420px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        #city-input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        button {
+            background: #ffc107;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background: #ff9800;
+        }
+
+        .data-display {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: left;
+        }
+
+        .data-display h2 {
+            border-bottom: 2px solid rgba(255,255,255,0.4);
+            padding-bottom: 10px;
+        }
+
+        .data-display p {
+            font-size: 1.1em;
+            margin: 8px 0;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(-15px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+    </style>
+</head>
+<body>
+
+    <div class="weather-container">
+        <h1>🌤️ मौसम विश्लेषण</h1>
+
+        <div class="search-box">
+            <input type="text" id="city-input" placeholder="शहर का नाम लिखें (जैसे: Delhi)">
+            <button onclick="getWeather()">देखें</button>
+        </div>
+
+        <div id="weather-data" class="data-display">
+            <p>कृपया शहर का नाम दर्ज करें और "देखें" पर क्लिक करें।</p>
+        </div>
+    </div>
+
+    <script>
+        // 👉 यहाँ अपनी OpenWeatherMap API Key डालें 👇
+        const API_KEY = "73e4135e8c6d9d61d0780e3979989f8b";  
+        const BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
+
+        async function getWeather() {
+            const city = document.getElementById('city-input').value.trim();
+            const weatherBox = document.getElementById('weather-data');
+
+            if (city === "") {
+                alert("varanasi");
+                return;
+            }
+
+            weatherBox.innerHTML = "<p>⏳ मौसम डेटा लोड हो रहा है...</p>";
+
+            try {
+                const response = await fetch(${BASE_URL}?q=${city}&appid=${API_KEY}&units=metric&lang=hi);
+                if (!response.ok) throw new Error("शहर नहीं मिला।");
+
+                const data = await response.json();
+                displayWeather(data);
+            } catch (err) {
+                weatherBox.innerHTML = <p style="color: #ff6b6b;">❌ त्रुटि: ${err.message}</p>;
+            }
+        }
+
+        function displayWeather(data) {
+            const weatherBox = document.getElementById('weather-data');
+            const icon = getIcon(data.weather[0].main);
+
+            weatherBox.innerHTML = `
+                <h2>${data.name}, ${data.sys.country}</h2>
+                <p><strong>तापमान:</strong> ${data.main.temp}°C</p>
+                <p><strong>महसूस होता है:</strong> ${data.main.feels_like}°C</p>
+                <p><strong>मौसम:</strong> ${icon} ${data.weather[0].description}</p>
+                <p><strong>न्यूनतम / अधिकतम:</strong> ${data.main.temp_min}°C / ${data.main.temp_max}°C</p>
+                <p><strong>आर्द्रता:</strong> ${data.main.humidity}%</p>
+                <p><strong>हवा की गति:</strong> ${data.wind.speed} m/s</p>
+            `;
+        }
+
+        function getIcon(type) {
+            switch (type.toLowerCase()) {
+                case "clear": return "☀️";
+                case "clouds": return "☁️";
+                case "rain": return "🌧️";
+                case "drizzle": return "🌦️";
+                case "thunderstorm": return "⛈️";
+                case "snow": return "❄️";
+                case "mist":
+                case "fog":
+                case "haze": return "🌫️";
+                default: return "🌈";
+            }
+        }
+    </script>
+
+</body>
+</html>
